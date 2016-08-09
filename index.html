@@ -2,78 +2,43 @@
 layout: default
 ---
 
-<div id="map" class="map"></div>
+<div class="container">
+    <div id="map" class="map"></div>
+    <div class="controls">
+        <p>Город:</p>
+        <div class="controls__cities"></div>
+    </div>
+</div>
+
+<script src="/js/map.js"></script>
+<script src="/js/controls.js"></script>
 
 <script type="text/javascript">
-    var selectedCity = decodeURI(window.location.hash.substr(1));
-
     var cities = {{ site.data.cities-full | jsonify }};
-    var city = cities.filter(function(city) { return city.город == selectedCity; })[0];
 
-    var getCoordinates = function(value) {
-        return [
-            value.координаты[1],
-            value.координаты[0]
-        ];
+    var getCurrentCity = function() {
+        var selectedCity = decodeURI(window.location.hash.substr(1));
+
+        return selectedCity
+            ? cities.filter(function(city) { return city.город == selectedCity; })[0]
+            : cities[0];
     };
 
-    var getHospitalLocationBalloonContent = function(hospital, location) {
-        var hospitalContent = hospital.сайт
-                ? '<b><a href="' + hospital.сайт + '" target="_blank">' + hospital.название + '</a></b>'
-                : '<b>' + hospital.название + '</b>';
+    var changeCity = function() {
+        var city = getCurrentCity();
 
+        drawCitiesControl('.controls__cities', cities, city);
 
-        var typeContent = location.тип.join(', ');
+        document.getElementById('map').innerHTML = '';
 
-        var addressContent = location.адрес;
-
-        var telephoneContent = location.телефон;
-
-        return hospitalContent + ' — ' + typeContent +
-            '<br/>' + addressContent +
-            (telephoneContent ? '<br/>' + telephoneContent : '');
-    };
-
-    var getHospitalLocationPreset = function(location) {
-        return location.тип.indexOf('стоматология') > -1 ? 'islands#pinkCircleIcon'
-                : location.тип.indexOf('стационар') > -1 ? 'islands#greenCircleIcon'
-                : 'islands#blueCircleIcon';
-    };
-
-    var addOffice = function(map, office) {
-        map.geoObjects.add(new ymaps.Placemark(getCoordinates(office), {
-            hintContent: office.название,
-            balloonContent: '<b>' + office.название + '</b><br/>' + office.адрес
-        }, {
-            preset: 'islands#redCircleDotIcon'
-        }));
-    };
-
-    var addHospitalLocation = function(map, hospital, location) {
-        map.geoObjects.add(new ymaps.Placemark(getCoordinates(location), {
-            hintContent: hospital.название,
-            balloonContent: getHospitalLocationBalloonContent(hospital, location)
-        }, {
-            preset:getHospitalLocationPreset(location)
-        }));
-    };
-
-    var addCity = function(city) {
-        var map = new ymaps.Map("map", {
-            center: getCoordinates(city),
-            zoom: 12
-        });
-
-        city.офисы.forEach(function(office) { addOffice(map, office); });
-
-        city.больницы.forEach(function(hospital) {
-            hospital.отделения.forEach(function(location) {
-                addHospitalLocation(map, hospital, location);
-            });
+        ymaps.ready(function() {
+            addCity('map', city);
         });
     };
 
-    ymaps.ready(function() {
-        addCity(city);
-    });
+    (function() {
+        window.addEventListener('hashchange', changeCity);
+
+        changeCity();
+    })();
 </script>

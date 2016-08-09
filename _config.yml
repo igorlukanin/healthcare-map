@@ -1,6 +1,7 @@
 title: Карта больниц
 markdown: kramdown
 exclude:
-  - "*.iml"
+  - node_modules
   - package.json
+  - "*.iml"
   - "src/*.js"
