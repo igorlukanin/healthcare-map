@@ -1,0 +1,13 @@
+{
+  "name": "healthcare-map-prepare",
+  "version": "0.0.1",
+  "author": "Igor Lukanin",
+  "scripts": {
+    "start": "NODE_ENV=production node src/prepare.js _data/cities.yml _data/cities-full.yml"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.1",
+    "request": "^2.74.0",
+    "yaml-js": "^0.1.3"
+  }
+}
