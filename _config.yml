@@ -3,5 +3,5 @@ markdown: kramdown
 exclude:
   - node_modules
   - package.json
+  - src
   - "*.iml"
-  - "src/*.js"
