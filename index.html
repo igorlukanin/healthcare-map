@@ -2,22 +2,78 @@
 layout: default
 ---
 
-<div class="home">
+<div id="map" class="map"></div>
 
-  <h1 class="page-heading">Posts</h1>
+<script type="text/javascript">
+    var selectedCity = decodeURI(window.location.hash.substr(1));
 
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+    var cities = {{ site.data.cities-full | jsonify }};
+    var city = cities.filter(function(city) { return city.город == selectedCity; })[0];
 
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </li>
-    {% endfor %}
-  </ul>
+    var getCoordinates = function(value) {
+        return [
+            value.координаты[1],
+            value.координаты[0]
+        ];
+    };
 
-  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+    var getHospitalLocationBalloonContent = function(hospital, location) {
+        var hospitalContent = hospital.сайт
+                ? '<b><a href="' + hospital.сайт + '" target="_blank">' + hospital.название + '</a></b>'
+                : '<b>' + hospital.название + '</b>';
 
-</div>
+
+        var typeContent = location.тип.join(', ');
+
+        var addressContent = location.адрес;
+
+        var telephoneContent = location.телефон;
+
+        return hospitalContent + ' — ' + typeContent +
+            '<br/>' + addressContent +
+            (telephoneContent ? '<br/>' + telephoneContent : '');
+    };
+
+    var getHospitalLocationPreset = function(location) {
+        return location.тип.indexOf('стоматология') > -1 ? 'islands#pinkCircleIcon'
+                : location.тип.indexOf('стационар') > -1 ? 'islands#greenCircleIcon'
+                : 'islands#blueCircleIcon';
+    };
+
+    var addOffice = function(map, office) {
+        map.geoObjects.add(new ymaps.Placemark(getCoordinates(office), {
+            hintContent: office.название,
+            balloonContent: '<b>' + office.название + '</b><br/>' + office.адрес
+        }, {
+            preset: 'islands#redCircleDotIcon'
+        }));
+    };
+
+    var addHospitalLocation = function(map, hospital, location) {
+        map.geoObjects.add(new ymaps.Placemark(getCoordinates(location), {
+            hintContent: hospital.название,
+            balloonContent: getHospitalLocationBalloonContent(hospital, location)
+        }, {
+            preset:getHospitalLocationPreset(location)
+        }));
+    };
+
+    var addCity = function(city) {
+        var map = new ymaps.Map("map", {
+            center: getCoordinates(city),
+            zoom: 12
+        });
+
+        city.офисы.forEach(function(office) { addOffice(map, office); });
+
+        city.больницы.forEach(function(hospital) {
+            hospital.отделения.forEach(function(location) {
+                addHospitalLocation(map, hospital, location);
+            });
+        });
+    };
+
+    ymaps.ready(function() {
+        addCity(city);
+    });
+</script>
