@@ -53,7 +53,9 @@ var addCity = function(id, city) {
         controls: ['zoomControl', 'trafficControl']
     });
 
-    city.офисы.forEach(function(office) { addOffice(map, office); });
+    if (city.офисы !== undefined) {
+        city.офисы.forEach(function(office) { addOffice(map, office); });
+    }
 
     city.больницы.forEach(function(hospital) {
         hospital.отделения.forEach(function(location) {

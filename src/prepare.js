@@ -2,8 +2,6 @@ const api = require('./geocode');
 const yaml = require('./yaml');
 
 
-const apiDelayMs = 2000;
-
 const sourcePath = process.argv[2];
 const resultPath = process.argv[3];
 
@@ -11,11 +9,11 @@ const cities = yaml.read(sourcePath);
 
 
 cities.forEach(city => {
-    api.getCoordinates(city.город).then(c => city.координаты = c);
+    city.координаты = api.getCoordinates(city.город);
 
     if (city.офисы) {
         city.офисы.forEach(office => {
-            api.getCoordinates(office.адрес).then(c => office.координаты = c);
+            office.координаты = api.getCoordinates(office.адрес);
         });
     }
 
@@ -23,7 +21,7 @@ cities.forEach(city => {
         city.больницы.forEach(hospital => {
             if (hospital.отделения) {
                 hospital.отделения.forEach(location => {
-                    api.getCoordinates(location.адрес).then(c => location.координаты = c);
+                    location.координаты = api.getCoordinates(location.адрес);
 
                     if (!location.тип) {
                         location.тип = ['поликлиника'];
@@ -34,4 +32,4 @@ cities.forEach(city => {
     }
 });
 
-setTimeout(() => yaml.update(resultPath, cities), apiDelayMs);
+yaml.update(resultPath, cities);

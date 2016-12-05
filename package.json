@@ -3,11 +3,14 @@
   "version": "0.0.1",
   "author": "Igor Lukanin",
   "scripts": {
-    "start": "NODE_ENV=production node src/prepare.js _data/cities.yml _data/cities-full.yml"
+    "transform": "NODE_ENV=production node src/transform.js _data/hospitals.csv 2017",
+    "prepare": "NODE_ENV=production node src/prepare.js _data/cities.yml _data/cities-full.yml"
   },
   "dependencies": {
     "bluebird": "^3.4.1",
     "request": "^2.74.0",
+    "sync-request": "^3.0.1",
+    "ya-csv": "^0.10.1",
     "yaml-js": "^0.1.3"
   }
 }
